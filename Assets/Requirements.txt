@@ -1,0 +1,9 @@
+Template requirements
+
+// Game manager persists throughout entire game along with necessary UI
+//? Pixel-perfect setup w/ fullscreen that doesn't fuck up
+- Level saving + loading, simple black fade transition for now
+- Singleton format that persists between levels
+- Audio mixer with three main channels, stored over playerprefs
+//? JSON save/load capabilities with SavaData class
+// Newgrounds medal support
