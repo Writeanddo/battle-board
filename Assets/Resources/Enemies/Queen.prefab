@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2843139264835844398}
   - component: {fileID: 2843139264835844399}
   - component: {fileID: 2843139264835844393}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: EnemySprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 2843139265019965792}
   - component: {fileID: 2843139265019965795}
   - component: {fileID: 2843139265019965796}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Queen
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -277,7 +277,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2843139265911927744}
   - component: {fileID: 2843139265911927745}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -358,7 +358,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2843139266528296515}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SpriteHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}

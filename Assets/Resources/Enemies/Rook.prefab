@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3664825697536629869}
   - component: {fileID: 3664825697536629860}
   - component: {fileID: 8274092720629055830}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: EnemySprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 3664825698425144205}
   - component: {fileID: 3664825698425144207}
   - component: {fileID: 3664825698425144203}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rook
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -226,5 +226,7 @@ MonoBehaviour:
     damage: 2
     playerKnockbackAmount: 25
     projectile: {fileID: 0}
+    invincible: 0
+    bigEnemy: 0
   isDead: 0
   knockbackVelocity: {x: 0, y: 0}

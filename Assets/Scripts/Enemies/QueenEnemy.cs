@@ -33,8 +33,6 @@ public class QueenEnemy : Enemy
     {
         if (isDead)
         {
-            //rb.velocity = knockbackVelocity;
-            if (rb.velocity == Vector2.zero)
                 DestroyEnemy();
             return;
         }
@@ -59,7 +57,7 @@ public class QueenEnemy : Enemy
             xDir = 0;
 
 
-        int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, ply.transform.position) / 2) * 2 + 4;
+        int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, ply.transform.position) / 2) * 2;
         StartCoroutine(MovePieceTowards(xDir, yDir, numSpaces));
     }
 
@@ -68,7 +66,7 @@ public class QueenEnemy : Enemy
         performingMovement = true;
         movementVelocity = Vector2.zero;
 
-        float adjustedDistance = ((Vector2.right * x + Vector2.up * y) * distance).magnitude;
+        float adjustedDistance = distance;
 
         Vector2 startingPos = transform.position;
         while (Vector2.Distance(transform.position, startingPos) < adjustedDistance)
@@ -79,10 +77,17 @@ public class QueenEnemy : Enemy
             }
             rb.velocity = movementVelocity;
             yield return new WaitForFixedUpdate();
+            if (transform.position.y < -21 || transform.position.y > 25 || transform.position.x < -24 || transform.position.x > 24)
+            {
+                performingMovement = false;
+                transform.position = new Vector2(Mathf.Clamp(transform.position.x, -24, 24), Mathf.Clamp(transform.position.y, -21, 25));
+                rb.velocity = Vector2.zero;
+                yield break;
+            }
         }
 
         rb.velocity = Vector2.zero;
-        transform.position = startingPos + (Vector2.right * x + Vector2.up * y) * distance;
+        //transform.position = startingPos + (Vector2.right * x + Vector2.up * y) * distance;
         yield return new WaitForSeconds(Random.Range(0.25f, 0.5f));
 
         // Attack

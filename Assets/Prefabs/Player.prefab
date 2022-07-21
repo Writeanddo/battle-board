@@ -194,14 +194,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats:
-    health: 100
+    health: 20
     baseMaxHealth: 20
     speed: 0
     acceleration: 5
     baseMaxSpeed: 8
-    baseRateOfFire: 0.25
+    baseRateOfFire: 0.3
+  buffs:
+    speedMultiplier: 1
+    healthMultiplier: 1
+    firerateMultiplier: 1
+    damageMultiplier: 1
   canMove: 1
-  isDying: 0
+  isDead: 0
   bomb: {fileID: 559472823050152334, guid: b21738e00838e254d963854b25281220, type: 3}
   additionalForce: {x: 0, y: 0}
   knockbackForceFromEnemies: {x: 0, y: 0}
@@ -439,6 +444,6 @@ SpriteRenderer:
   m_Size: {x: 0.32, y: 0.32}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0

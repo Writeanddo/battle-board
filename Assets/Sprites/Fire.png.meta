@@ -1,37 +1,22 @@
 fileFormatVersion: 2
-guid: ab8ec6da0ad446f49a2d60c967b6f489
+guid: 551ae0c814ea2a34c8de24e2c5660eb3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 507087332979171014
-    second: WeaponModsDice_0
+      213: 1098286324429101383
+    second: Fire_0
   - first:
-      213: 8668876793811604688
-    second: WeaponModsDice_1
+      213: 7419590508823533442
+    second: Fire_1
   - first:
-      213: 8753741817921936480
-    second: DiceIcons_0
+      213: 2333874723133794383
+    second: Fire_2
   - first:
-      213: -4624105994463601106
-    second: DiceIcons_1
+      213: 6211036013863027259
+    second: Fire_3
   - first:
-      213: 6371920771885271083
-    second: DiceIcons_2
-  - first:
-      213: -5160544589018136297
-    second: DiceIcons_3
-  - first:
-      213: 5100298923343220932
-    second: DiceIcons_4
-  - first:
-      213: 5177944124723024577
-    second: DiceIcons_5
-  - first:
-      213: -7778232656578270811
-    second: DiceIcons_6
-  - first:
-      213: 3098834512686095028
-    second: DiceIcons_7
+      213: 2168491126659702453
+    second: Fire_4
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -133,7 +118,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: DiceIcons_0
+      name: Fire_0
       rect:
         serializedVersion: 2
         x: 0
@@ -147,14 +132,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 06c18b8ddc98b7970800000000000000
-      internalID: 8753741817921936480
+      spriteID: 7491445d795ed3f00800000000000000
+      internalID: 1098286324429101383
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: DiceIcons_1
+      name: Fire_1
       rect:
         serializedVersion: 2
         x: 32
@@ -168,14 +153,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e2e1e3cf810e3dfb0800000000000000
-      internalID: -4624105994463601106
+      spriteID: 2875941d14ea7f660800000000000000
+      internalID: 7419590508823533442
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: DiceIcons_2
+      name: Fire_2
       rect:
         serializedVersion: 2
         x: 64
@@ -189,14 +174,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b288721ae2c9d6850800000000000000
-      internalID: 6371920771885271083
+      spriteID: f4827aef1b6936020800000000000000
+      internalID: 2333874723133794383
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: DiceIcons_3
+      name: Fire_3
       rect:
         serializedVersion: 2
         x: 96
@@ -210,14 +195,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 711820cb9001268b0800000000000000
-      internalID: -5160544589018136297
+      spriteID: b32c67dd858023650800000000000000
+      internalID: 6211036013863027259
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: DiceIcons_4
+      name: Fire_4
       rect:
         serializedVersion: 2
         x: 128
@@ -231,71 +216,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4c01e2629d6e7c640800000000000000
-      internalID: 5100298923343220932
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: DiceIcons_5
-      rect:
-        serializedVersion: 2
-        x: 160
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1c2dfec5fb0cbd740800000000000000
-      internalID: 5177944124723024577
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: DiceIcons_6
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 5a92f441c9a2e0490800000000000000
-      internalID: -7778232656578270811
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: DiceIcons_7
-      rect:
-        serializedVersion: 2
-        x: 224
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 4ba106a2295410b20800000000000000
-      internalID: 3098834512686095028
+      spriteID: 5be5327c037081e10800000000000000
+      internalID: 2168491126659702453
       vertices: []
       indices: 
       edges: []

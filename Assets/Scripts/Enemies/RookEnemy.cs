@@ -21,8 +21,6 @@ public class RookEnemy : Enemy
     {
         if (isDead)
         {
-            rb.velocity = knockbackVelocity;
-            if (rb.velocity == Vector2.zero)
                 DestroyEnemy();
             return;
         }
@@ -32,12 +30,12 @@ public class RookEnemy : Enemy
 
         if (Mathf.Abs(transform.position.x - ply.transform.position.x) > Mathf.Abs(transform.position.y - ply.transform.position.y))
         {
-            int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, new Vector2(ply.transform.position.x, transform.position.y)) / 2) * 2 + 4;
+            int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, new Vector2(ply.transform.position.x, transform.position.y)) / 2) * 2;
             StartCoroutine(MovePieceTowards(Mathf.Sign(ply.transform.position.x - transform.position.x), 0, numSpaces));
         }
         else
         {
-            int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, new Vector2(transform.position.x, ply.transform.position.y)) / 2) * 2 + 4;
+            int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, new Vector2(transform.position.x, ply.transform.position.y)) / 2) * 2;
             StartCoroutine(MovePieceTowards(0, Mathf.Sign(ply.transform.position.y - transform.position.y), numSpaces));
         }
 
@@ -59,6 +57,14 @@ public class RookEnemy : Enemy
             }
             rb.velocity = movementVelocity;
             yield return new WaitForFixedUpdate();
+
+            if (transform.position.y < -21 || transform.position.y > 25 || transform.position.x < -24 || transform.position.x > 24)
+            {
+                performingMovement = false;
+                transform.position = new Vector2(Mathf.Clamp(transform.position.x, -24, 24), Mathf.Clamp(transform.position.y, -21, 25));
+                rb.velocity = Vector2.zero;
+                yield break;
+            }
         }
 
         rb.velocity = Vector2.zero;

@@ -95,7 +95,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34be4b6a8b0f82c49986692be9d1c77d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnClones: 1
+  spawnClones: 0
   ClonesPerSecond: 16
   colorDecayMultiplier: 3
   colorPerSecond: {r: 255, g: 255, b: 255, a: 1}

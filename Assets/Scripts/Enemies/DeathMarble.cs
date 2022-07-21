@@ -27,6 +27,7 @@ public class DeathMarble : Enemy
         rb = GetComponent<Rigidbody2D>();
         gm = FindObjectOfType<GameManager>();
         spr = transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>();
+        sm = FindObjectOfType<StatManager>();
     }
 
     void FixedUpdate()

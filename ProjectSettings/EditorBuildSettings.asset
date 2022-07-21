@@ -9,9 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/Logo.unity
     guid: c308564d284edd148aef74f03d991ac8
   - enabled: 1
+    path: Assets/Scenes/singletonloader.unity
+    guid: c32edb20f521d124c9985390010ca0d0
+  - enabled: 1
     path: Assets/Scenes/TitleScreen.unity
     guid: 568d594e3c30aef4ba46e67e8a4f1fe8
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
+    path: Assets/Scenes/MainLevel.unity
+    guid: 9d4ba090a80c7b74686b0d0d31c2584b
   m_configObjects: {}

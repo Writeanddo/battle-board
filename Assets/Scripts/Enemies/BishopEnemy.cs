@@ -21,14 +21,15 @@ public class BishopEnemy : Enemy
     {
         if (isDead)
         {
-            //rb.velocity = knockbackVelocity;
-            if (rb.velocity == Vector2.zero)
-                DestroyEnemy();
+            DestroyEnemy();
             return;
         }
 
         if (performingMovement)
             return;
+
+        Vector2 targetPosition = new Vector2(Mathf.RoundToInt(ply.transform.position.x / 2) * 2, Mathf.RoundToInt(ply.transform.position.y / 2) * 2);
+
 
         int xDir = 1;
         int yDir = 1;
@@ -37,7 +38,7 @@ public class BishopEnemy : Enemy
         if (ply.transform.position.y < transform.position.y)
             yDir = -1;
 
-        int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, ply.transform.position) / 2) * 2 + 4;
+        int numSpaces = Mathf.RoundToInt(Vector2.Distance(transform.position, ply.transform.position) / 2) * 2;
         StartCoroutine(MovePieceTowards(xDir, yDir, numSpaces));
     }
 
@@ -46,7 +47,7 @@ public class BishopEnemy : Enemy
         performingMovement = true;
         movementVelocity = Vector2.zero;
 
-        float adjustedDistance = ((Vector2.right * x + Vector2.up * y) * distance).magnitude;
+        float adjustedDistance = distance;
 
         Vector2 startingPos = transform.position;
         while (Vector2.Distance(transform.position, startingPos) < adjustedDistance)
@@ -57,10 +58,19 @@ public class BishopEnemy : Enemy
             }
             rb.velocity = movementVelocity;
             yield return new WaitForFixedUpdate();
+
+            if (transform.position.y < -21 || transform.position.y > 25 || transform.position.x < -24 || transform.position.x > 24)
+            {
+                performingMovement = false;
+                transform.position = new Vector2(Mathf.Clamp(transform.position.x, -24, 24), Mathf.Clamp(transform.position.y, -21, 25));
+                rb.velocity = Vector2.zero;
+                yield break;
+            }
+
         }
 
         rb.velocity = Vector2.zero;
-        transform.position = startingPos + (Vector2.right * x + Vector2.up * y) * distance;
+        //transform.position = startingPos + (Vector2.right * x + Vector2.up * y) * distance;
         yield return new WaitForSeconds(Random.Range(0.25f, 0.5f));
 
         // Attack

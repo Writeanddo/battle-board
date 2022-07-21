@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7840132360412538275}
   - component: {fileID: 7840132360412538273}
   - component: {fileID: 7840132360412538274}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: EnemySprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -168,7 +168,7 @@ GameObject:
   - component: {fileID: 7840132361132014155}
   - component: {fileID: 7840132361132014153}
   - component: {fileID: 7840132361132014146}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bishop
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -262,5 +262,7 @@ MonoBehaviour:
     damage: 2
     playerKnockbackAmount: 25
     projectile: {fileID: 3421887981903085775, guid: 819a7b20c5d847b40b90ecf52eab5320, type: 3}
+    invincible: 0
+    bigEnemy: 0
   isDead: 0
   knockbackVelocity: {x: 0, y: 0}

@@ -12,6 +12,11 @@ public class CameraFollow : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
+    }
+
+    public void GetRefs()
+    {
         ply = FindObjectOfType<PlayerController>();
         wm = FindObjectOfType<WaveManager>();
     }

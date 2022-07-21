@@ -309,8 +309,8 @@ MonoBehaviour:
     health: 30
     maxHealth: 0
     maxSpeed: 8
-    damage: 0
-    playerKnockbackAmount: 0
+    damage: 8
+    playerKnockbackAmount: 8
     projectile: {fileID: 0}
     invincible: 1
     bigEnemy: 0

@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
         public bool isLoadingLevel;
         public Vector2 screenSize;
         public UIState currentUIState;
+        public int kills;
     }
     [System.Serializable]
     public class GamePublicReferences
@@ -25,6 +26,9 @@ public class GameManager : MonoBehaviour
         public GameObject hitNumber;
         public GameObject[] smokeClouds;
         public GameObject bigExplosion;
+        public GameObject lightningChain;
+        public GameObject lightningBall;
+        public GameObject fire;
     }
     [System.Serializable]
     public class GameSoundEffects
@@ -75,15 +79,27 @@ public class GameManager : MonoBehaviour
     Animator diceRollPanel;
     RectTransform playerStatsPanel;
 
+    RectTransform hudHolder;
     RectTransform nextLevelButton;
     RectTransform goBackPanel;
     RectTransform attributeSelectPanel;
     Image statEffectImage;
     Image statValueImage;
 
+    Button statBoostButton;
+    Button weaponModButton;
+    Button statEffectButton;
+
+    RectTransform gameOverpanel;
+    RectTransform titleScreenPanel;
+    TextMeshProUGUI totalKillsText;
+    TextMeshProUGUI totalRoomsText;
+    TextMeshProUGUI healthText;
+
     // Other references
     NewgroundsUtility ng;
     Transform cam;
+    CameraFollow camFollow;
     PlayerController ply;
     StatManager sm;
     WaveManager wm;
@@ -102,10 +118,18 @@ public class GameManager : MonoBehaviour
     {
         DontDestroyOnLoad(transform.parent.gameObject);
         GetReferences();
-        LoadAudioLevelsFromPlayerPrefs();
+        //LoadAudioLevelsFromPlayerPrefs();
         blackScreenOverlay.color = Color.black;
-        StartCoroutine(FadeFromBlack());
         initialized = true;
+
+        if (SceneManager.GetActiveScene().buildIndex == 1)
+            LoadLevel(2);
+        else if (SceneManager.GetActiveScene().buildIndex == 3)
+        {
+            StartCoroutine(FadeFromBlack());
+            blackScreenOverlay.color = Color.clear;
+            PostLoadUpdates(3);
+        }
 
     }
     void Update()
@@ -115,6 +139,9 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
             SetFullscreenMode(!Screen.fullScreen);
+
+        if (gm_gameVars.currentUIState == UIState.inGame)
+            healthText.text = ply.stats.health.ToString();
     }
 
     public void CheckAndPlayClip(string clipName, Animator anim)
@@ -140,16 +167,14 @@ public class GameManager : MonoBehaviour
         while (blackScreenOverlay.color.a < 1)
         {
             blackScreenOverlay.color = new Color(0, 0, 0, blackScreenOverlay.color.a + 0.075f);
-            sfxSource.volume -= 0.075f;
             yield return new WaitForSecondsRealtime(0.025f);
         }
     }
     void GetReferences()
     {
-        ply = FindObjectOfType<PlayerController>();
         cam = gm_gameRefs.globalCameraHolderReference.GetChild(0);
+        camFollow = FindObjectOfType<CameraFollow>();
         sm = GetComponent<StatManager>();
-        wm = FindObjectOfType<WaveManager>();
 
         // UI references
         blackScreenOverlay = GameObject.Find("BlackScreenOverlay").GetComponent<Image>();
@@ -172,6 +197,15 @@ public class GameManager : MonoBehaviour
         attributeSelectPanel = GameObject.Find("SelectDiceAttributePanel").GetComponent<RectTransform>();
         statEffectImage = GameObject.Find("StatEffectButton").GetComponent<Image>();
         statValueImage = GameObject.Find("StatValueButton").GetComponent<Image>();
+        statBoostButton = GameObject.Find("NewStatButton").GetComponent<Button>();
+        weaponModButton = GameObject.Find("NewWeaponModButton").GetComponent<Button>();
+        statEffectButton = GameObject.Find("StatEffectButton").GetComponent<Button>();
+        healthText = GameObject.Find("HealthText").GetComponent<TextMeshProUGUI>();
+        gameOverpanel = GameObject.Find("GameOverPanel").GetComponent<RectTransform>();
+        hudHolder = GameObject.Find("HUDHolder").GetComponent<RectTransform>();
+        titleScreenPanel = GameObject.Find("TitleScreenPanel").GetComponent<RectTransform>();
+        totalKillsText = GameObject.Find("TotalKillsText").GetComponent<TextMeshProUGUI>();
+        totalRoomsText = GameObject.Find("TotalWavesText").GetComponent<TextMeshProUGUI>();
 
         // Audio references
         musicSource = GameObject.Find("GameMusicSource").GetComponent<AudioSource>();
@@ -180,6 +214,7 @@ public class GameManager : MonoBehaviour
         ambienceSource = GameObject.Find("GameAmbienceSource").GetComponent<AudioSource>();
 
         ng = FindObjectOfType<NewgroundsUtility>();
+
     } // Obtain UI + GameObject references. Called by Start() and probably nowhere else
     public void InitializePlayer() { } // Readies / unfreezes player gameobject in-game
     public void SetPausedState(bool paused) { } // Pauses / unpauses game and performs necessary UI stuff
@@ -201,13 +236,46 @@ public class GameManager : MonoBehaviour
         AsyncOperation asyncLoadLevel = SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Single);
         while (!asyncLoadLevel.isDone)
             yield return null;
+
+        PostLoadUpdates(buildIndex);
         yield return FadeFromBlack();
         gm_gameVars.isLoadingLevel = false;
     }
     void PostLoadUpdates(int buildIndex)
     {
+        if (buildIndex == 2)
+        {
+            gm_gameVars.currentUIState = UIState.titleScreen;
+            titleScreenPanel.anchoredPosition = Vector2.zero;
+            PlayMusic(2);
+            hudHolder.anchoredPosition = Vector2.down * 1500;
+            gameOverpanel.anchoredPosition = Vector2.down * 1500;
+            statBg.color = Color.clear;
+            if (Application.platform == RuntimePlatform.WindowsPlayer)
+                GameObject.Find("ExitGameButton").GetComponent<RectTransform>().anchoredPosition = Vector2.one * 64;
+        }
+        else if (buildIndex == 3)
+        {
+            PlayMusic(Random.Range(0, 2));
+            gm_gameVars.currentUIState = UIState.inGame;
+            titleScreenPanel.anchoredPosition = Vector2.down * 1500;
+            hudHolder.anchoredPosition = Vector2.zero;
+            gameOverpanel.anchoredPosition = Vector2.down * 1500;
+            StartCoroutine(InitializeGame());
+        }
 
     } // Updates / changes that are performed when a level is loaded
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    public void OpenMountainLink()
+    {
+        Application.OpenURL("https://the-mountain.itch.io/");
+    }
+
     void LoadAudioLevelsFromPlayerPrefs()
     {
         if (PlayerPrefs.HasKey("AMB_VOLUME"))
@@ -226,11 +294,22 @@ public class GameManager : MonoBehaviour
         sfxSource.PlayOneShot(sfx);
     }
 
+    public void PlaySFXStoppable(AudioClip sfx)
+    {
+        sfxSourceStoppable.Stop();
+        sfxSourceStoppable.PlayOneShot(sfx);
+    }
+
     public void PlayMusic(int index)
     {
         musicSource.Stop();
         musicSource.clip = gm_gameSfx.musicTracks[index];
         musicSource.Play();
+    }
+
+    public void StopMusic()
+    {
+        musicSource.Stop();
     }
     void ReadSaveData()
     {
@@ -329,6 +408,76 @@ public class GameManager : MonoBehaviour
         string json = JsonUtility.ToJson(gm_gameSaveData);
         File.WriteAllText(prefix + @"/savedata.json", json);
     }
+    public void RetryGame()
+    {
+        LoadLevel(3);
+    }
+
+    IEnumerator InitializeGame()
+    {
+        ply = FindObjectOfType<PlayerController>();
+        wm = FindObjectOfType<WaveManager>();
+        camFollow.GetRefs();
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
+        ResetGame();
+
+        while (blackScreenOverlay.color.a > 0)
+            yield return null;
+
+        diceRollPanel.Play("DiceRoller_PushIn", 0, 0);
+
+        playerStatsPanel.anchoredPosition = Vector2.zero;
+        statBg.color = Color.white;
+
+        // Add new enemies to lineup
+        diceRollText.text = "YOUR FIRST ENEMIES";
+        yield return RollBothDice(sm.enemyDice, 1);
+        yield return RollBothDice(sm.enemyDice, 1);
+        yield return RollBothDice(sm.enemyDice, 1);
+        yield return RollBothDice(sm.enemyDice, 1);
+        yield return RollBothDice(sm.enemyDice, 1);
+        yield return RollBothDice(sm.enemyDice, 1);
+        yield return RollBothDice(sm.weaponModifiers, 0);
+        yield return RollBothDice(sm.weaponModifiers, 0);
+        yield return RollBothDice(sm.weaponModifiers, 0);
+        yield return RollBothDice(sm.weaponModifiers, 0);
+
+        nextRoundTitleText.text = "NEXT WAVE:\n" + wm.CurrentWaveToString();
+        diceRollText.text = "";
+        diceRollPanel.Play("DiceRoller_PushOut", 0, 0);
+    }
+
+    public IEnumerator EndLevel()
+    {
+        yield return new WaitForSeconds(1.25f);
+        PlayMusic(3);
+        totalKillsText.text = gm_gameVars.kills + "\nKILLS";
+        totalRoomsText.text = wm.furthestRoundReached + " WAVES\nCLEARED";
+        gameOverpanel.anchoredPosition = Vector2.zero;
+    }
+
+    public void ResetGame()
+    {
+        statBoostButton.interactable = true;
+        weaponModButton.interactable = true;
+        statEffectButton.interactable = true;
+        levelUpPanel.anchoredPosition = Vector2.down * 1500;
+        playerStatsPanel.anchoredPosition = Vector2.down * 1500;
+        attributeSelectPanel.anchoredPosition = Vector2.down * 1500;
+        goBackPanel.anchoredPosition = Vector2.down * 1500;
+        statBg.color = Color.black;
+
+        gm_gameVars.kills = 0;
+
+        sm.ResetGame();
+        wm.ResetGame();
+
+        ply.canMove = false;
+        ply.transform.position = Vector2.zero;
+        ply.stats.health = ply.stats.baseMaxHealth;
+        ply.isDead = false;
+    }
 
     public IEnumerator CompleteWaveSequence()
     {
@@ -343,12 +492,26 @@ public class GameManager : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
+        // Disable buttons if we've unlocked all stats or if we've reached the maximum number of boons
+        if (sm.playerStats.Count >= 9)
+        {
+            statBoostButton.interactable = false;
+            weaponModButton.interactable = false;
+        }
+
+        if (sm.unlockedStatBuffs.Count == sm.basicStats.Length)
+            statBoostButton.interactable = false;
+        if (sm.unlockedWeaponMods.Count == sm.weaponModifiers.Length)
+            weaponModButton.interactable = false;
+
         levelUpPanel.anchoredPosition = Vector2.zero;
 
+        // Value is determined by player input
+        // Waits until selection is made
         while (endOfLevelSelection == -1)
             yield return null;
 
-        levelUpPanel.anchoredPosition = Vector2.left * 1000;
+        levelUpPanel.anchoredPosition = Vector2.down * 1500;
         diceRollPanel.Play("DiceRoller_PushIn", 0, 0);
 
         yield return new WaitForSeconds(0.25f);
@@ -362,15 +525,21 @@ public class GameManager : MonoBehaviour
 
         if (endOfLevelSelection < 2)
         {
-            diceRollText.text = "Rolling player stat";
+            diceRollText.text = "ROLLING BOON";
             yield return RollBothDice(pool, 0); // 0 for player, 1 for enemy
         }
         else
         {
-            diceRollText.text = "Rerolling";
+            string previousId = "";
+            if (displayerToReroll != null)
+                previousId = displayerToReroll.displayedStat.info.id;
+            diceRollText.text = "REROLLING";
 
             int recipient = 0;
-            if (displayerToReroll.displayedStat.info.id.Contains("mob") || displayerToReroll.displayedStat.info.id.Contains("badstuff"))
+            print(displayerToReroll == null);
+            print(displayerToReroll.displayedStat == null);
+            print(displayerToReroll.displayedStat.info.id);
+            if (displayerToReroll.displayedStat.info.id.Contains("mob_") || displayerToReroll.displayedStat.info.id.Contains("badstuff_"))
                 recipient = 1;
 
             // Reroll left die
@@ -382,28 +551,48 @@ public class GameManager : MonoBehaviour
                 yield return RollSingleDie(sm.numericalDice, recipient, 1);
 
             // Reroll single center die
-            else if(endOfLevelSelection == 4)
+            else if (endOfLevelSelection == 4)
                 yield return RollCenterDie(sm.GetPoolFromPrefix(displayerToReroll.displayedStat.info.id), recipient);
+
+            sm.RemoveStatFromPreviouslyRolledPool(previousId);
         }
-        diceRollText.text = "Rolling new enemy";
+
+        rerollDepth = 0;
+        endOfLevelSelection = -1;
+        displayerToReroll = null;
+
+        // Add goodstuff if we've looped
+        if (wm.currentLoop == 1 && wm.currentRound == 1 && wm.currentWorld == 1)
+        {
+            diceRollText.text = "YOUR REWARD\nFOR LOOPING";
+            yield return RollCenterDie(sm.goodstuff, 0);
+        }
+
         // Add new enemies to lineup
+        diceRollText.text = "ROLLING BOGUS";
         yield return RollBothDice(sm.enemyDice, 1);
 
-        // Add enemy badstuff if new world reached
-        if (wm.currentRound == 1 && !(wm.currentLoop == 0 && wm.currentWorld == 0))
+        if (sm.enemyStats.Count < 15)
         {
-            diceRollText.text = "Your enemies grow stronger";
-            yield return new WaitForSeconds(0.25f);
-            yield return RollCenterDie(sm.terriblestuff, 1);
+            // Add enemy badstuff if new world reached
+            if (wm.currentRound == 1 && !(wm.currentLoop == 0 && wm.currentWorld == 1))
+            {
+                diceRollText.text = "YOUR ENEMIES GROW STRONGER";
+                yield return new WaitForSeconds(0.25f);
+                yield return RollCenterDie(sm.terriblestuff, 1);
+            }
         }
 
         attributeSelectPanel.anchoredPosition = Vector2.down * 1500;
         goBackPanel.anchoredPosition = Vector2.down * 1500;
         nextLevelButton.anchoredPosition = Vector2.down * 290;
-        nextRoundTitleText.text = "Next round: " + wm.CurrentWaveToString();
+        nextRoundTitleText.text = "NEXT WAVE:\n" + wm.CurrentWaveToString();
         diceRollText.text = "";
-        endOfLevelSelection = -1;
         playerStatsPanel.anchoredPosition = Vector2.zero;
+
+        // Update player stats buffs
+        sm.PreparePlayerStats();
+
         diceRollPanel.Play("DiceRoller_PushOut", 0, 0);
     }
 
@@ -418,9 +607,15 @@ public class GameManager : MonoBehaviour
         newStatToDisplay = sm.GetNewStat(pool);
 
         if (statRecipient == 0)
-            sm.AddPlayerStat(newStatToDisplay);
+            sm.AddPlayerStat(newStatToDisplay, false);
         else
-            sm.AddEnemyStat(newStatToDisplay);
+        {
+            // Stop adding to displayers if we've filled up the space
+            if (sm.enemyStats.Count >= 15)
+                sm.enemyStats.Add(newStatToDisplay);
+            else
+                sm.AddEnemyStat(newStatToDisplay);
+        }
 
         yield return new WaitForSeconds(2);
     }
@@ -428,10 +623,11 @@ public class GameManager : MonoBehaviour
     IEnumerator RollSingleDie(StatManager.StatInfo[] pool, int statRecipient, int dieToRoll)
     {
         PlaySFX(gm_gameSfx.generalSfx[2]);
-        newStatToDisplay = sm.GetNewStat(pool);
+        newStatToDisplay = displayerToReroll.displayedStat;
 
         if (dieToRoll == 0)
         {
+            newStatToDisplay = sm.GetNewStat(pool);
             diceRollPanel.Play("DiceRoller_RollLeft", 0, 0);
             randDice[0].DisplayRandomIcons(pool);
             randDice[1].DisplaySingleIcon(sm.numericalDice[displayerToReroll.displayedStat.numericalValue - 1].icon);
@@ -439,6 +635,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            newStatToDisplay.numericalValue = Random.Range(1, 7);
             diceRollPanel.Play("DiceRoller_RollRight", 0, 0);
             randDice[0].DisplaySingleIcon(displayerToReroll.displayedStat.info.icon);
             randDice[1].DisplayRandomIcons(sm.numericalDice);
@@ -446,7 +643,7 @@ public class GameManager : MonoBehaviour
         }
 
         if (statRecipient == 0)
-            sm.ReplacePlayerStat(displayerToReroll.statIndex, newStatToDisplay);
+            sm.ReplacePlayerStat(displayerToReroll.statIndex, newStatToDisplay, false);
         else
             sm.ReplaceEnemyStat(displayerToReroll.statIndex, newStatToDisplay);
 
@@ -462,19 +659,26 @@ public class GameManager : MonoBehaviour
         randDice[1].DisplayRandomIcons(sm.numericalDice);
 
         newStatToDisplay = sm.GetNewStat(pool);
+        bool isUltra = newStatToDisplay.info.id.Contains("goodstuff");
 
         // Add a new die unless we're rerolling
         if (endOfLevelSelection < 2)
         {
             if (statRecipient == 0)
-                sm.AddPlayerStat(newStatToDisplay);
+                sm.AddPlayerStat(newStatToDisplay, isUltra);
             else
-                sm.AddEnemyStat(newStatToDisplay);
+            {
+                // Stop adding to displayers if we've filled up the space
+                if (sm.enemyStats.Count >= 15)
+                    sm.enemyStats.Add(newStatToDisplay);
+                else
+                    sm.AddEnemyStat(newStatToDisplay);
+            }
         }
         else
         {
             if (statRecipient == 0)
-                sm.ReplacePlayerStat(displayerToReroll.statIndex, newStatToDisplay);
+                sm.ReplacePlayerStat(displayerToReroll.statIndex, newStatToDisplay, isUltra);
             else
                 sm.ReplaceEnemyStat(displayerToReroll.statIndex, newStatToDisplay);
         }
@@ -502,19 +706,13 @@ public class GameManager : MonoBehaviour
         newStatToDisplay = null;
     }
 
-    public void ShowBoonsPanel()
-    {
-        displayerToReroll = null;
-        levelUpPanel.anchoredPosition = Vector2.down * 1500;
-        nextRoundTitleText.text = "Choose a die to reroll";
-        diceRollText.text = "";
-        endOfLevelSelection = -1;
-        playerStatsPanel.anchoredPosition = Vector2.zero;
-        StartCoroutine(WaitForRerollSelection());
-    }
-
     public void SetDiceAttributeSprites()
     {
+        print(displayerToReroll == null);
+        print(displayerToReroll.name);
+
+        statEffectButton.interactable = !((sm.unlockedStatBuffs.Count == 4 && displayerToReroll.displayedStat.info.id.Contains("stats")) || (sm.unlockedWeaponMods.Count == 7 && displayerToReroll.displayedStat.info.id.Contains("mods")));
+
         statEffectImage.sprite = displayerToReroll.displayedStat.info.icon;
         statValueImage.sprite = sm.numericalDice[displayerToReroll.displayedStat.numericalValue - 1].icon;
     }
@@ -535,7 +733,7 @@ public class GameManager : MonoBehaviour
             playerStatsPanel.anchoredPosition = Vector2.zero;
             nextLevelButton.anchoredPosition = Vector2.down * 1500;
             levelUpPanel.anchoredPosition = Vector2.down * 1500;
-            nextRoundTitleText.text = "Choose a die to reroll";
+            nextRoundTitleText.text = "SELECT A DIE\nTO REROLL";
         }
         else if (rerollDepth == 1)
         {
@@ -591,6 +789,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartNextWaveCoroutine()
     {
+        wm.UpdateArena();
         playerStatsPanel.anchoredPosition = Vector2.right * 1500;
         ply.transform.position = new Vector2(0, 0.75f);
         float transparency = 1;

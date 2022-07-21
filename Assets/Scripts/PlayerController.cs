@@ -15,11 +15,36 @@ public class PlayerController : MonoBehaviour
         public float baseRateOfFire;
     }
 
+    [System.Serializable]
+    public class StatBuffs
+    {
+        public float speedMultiplier = 1;
+        public float healthMultiplier = 1;
+        public float firerateMultiplier = 1;
+        public float damageMultiplier = 1;
+    }
+
+    public enum BulletType
+    {
+        bigshot,
+        splitshot,
+        spreadshot,
+        stun,
+        crit,
+        homing,
+        homerun,
+        bigBoom,
+        lightning
+    }
+
     public PlayerStats stats;
+    public StatBuffs buffs;
 
     public bool canMove;
-    public bool isDying;
-    
+    public bool isDead;
+
+    bool hurting;
+
     public GameObject bomb;
 
     [HideInInspector]
@@ -32,11 +57,16 @@ public class PlayerController : MonoBehaviour
     Transform crosshair;
     Transform weaponHolder;
     Animator anim;
+    Animator gunAnim;
     SpriteRenderer spr;
     SpriteRenderer weaponSpr;
     Transform bulletSpawnPos;
     GameManager gm;
     Rigidbody2D rb;
+    StatManager sm;
+    WaveManager wm;
+
+    Vector2 lastFirePosition;
 
     // Start is called before the first frame update
     void Start()
@@ -46,45 +76,61 @@ public class PlayerController : MonoBehaviour
         weaponHolder = transform.GetChild(1);
         weaponSpr = weaponHolder.GetChild(0).GetComponent<SpriteRenderer>();
         bulletSpawnPos = weaponHolder.GetChild(1);
+        gunAnim = weaponSpr.GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         gm = FindObjectOfType<GameManager>();
+        sm = FindObjectOfType<StatManager>();
+        wm = FindObjectOfType<WaveManager>();
     }
 
     private void FixedUpdate()
     {
-        if (stats.health <= 0)
-            StartCoroutine(Die());
-
-        if (canMove && !isDying && stats.health > 0)
+        if (canMove && !isDead && stats.health > 0)
         {
             UpdateInputAxes();
-            //UpdateMovementAnimations();
+            UpdateMovementAnimations();
         }
         else
             rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, 0.15f);
     }
 
-    IEnumerator Die()
-    {
-        yield return null;
-    }
-
     void Update()
     {
-        if (gm.gm_gameVars.gamePaused || !canMove || isDying || stats.health <= 0)
+        if (gm.gm_gameVars.gamePaused || !canMove || isDead || stats.health <= 0)
             return;
 
         UpdateInputButtons();
         RotateArm();
+
+        if(wm.inBattle)
+        {
+            if (sm.currentUltraStat.info.id.Contains("goodstuff_firetrail"))
+            {
+                if(Vector2.Distance(transform.position, lastFirePosition) > 1)
+                {
+                    Instantiate(gm.gm_gameRefs.fire, transform.position, Quaternion.identity);
+                    lastFirePosition = transform.position;
+                }
+            }
+        }
+    }
+
+    void UpdateMovementAnimations()
+    {
+        if (!isDead && !wm.inBattle)
+            CheckAndPlayClip("Player_Idle");
+
+        if (!hurting)
+        {
+            if (rb.velocity.magnitude > 1)
+                CheckAndPlayClip("Player_Walk");
+            else
+                CheckAndPlayClip("Player_Idle");
+        }
     }
 
     void UpdateInputAxes()
     {
-        if (rb.velocity.magnitude > 1)
-            CheckAndPlayClip("Player_Walk");
-        else
-            CheckAndPlayClip("Player_Idle");
-        
         if (!canMove)
             return;
 
@@ -93,16 +139,16 @@ public class PlayerController : MonoBehaviour
         float vert = Input.GetAxis("Vertical");
         Vector2 speed = new Vector2(horiz, vert);
 
-        if (isDying || stats.health <= 0)
+        if (isDead)
             additionalForce = Vector2.zero;
 
-        if (additionalForce == Vector2.zero && rb.velocity.magnitude > stats.baseMaxSpeed)
+        if (additionalForce == Vector2.zero && rb.velocity.magnitude > stats.baseMaxSpeed * buffs.speedMultiplier)
         {
             rb.velocity -= rb.velocity * 0.1f;
         }
         else
         {
-            rb.velocity = (Vector3.ClampMagnitude(speed, 1) * stats.baseMaxSpeed) + (Vector3)additionalForce + (Vector3)knockbackForceFromEnemies;
+            rb.velocity = (Vector3.ClampMagnitude(speed, 1) * stats.baseMaxSpeed * buffs.speedMultiplier) + (Vector3)additionalForce + (Vector3)knockbackForceFromEnemies;
             stats.speed = rb.velocity.magnitude;
         }
 
@@ -129,47 +175,132 @@ public class PlayerController : MonoBehaviour
 
     void UpdateInputButtons()
     {
-        if (gm.gm_gameVars.gamePaused || isDying || stats.health <= 0)
+        if (gm.gm_gameVars.gamePaused || isDead || stats.health <= 0)
             return;
 
         // Shoot gun
-        if (Input.GetButtonDown("Fire1") && !rechargingAttack)
+        if (Input.GetButton("Fire1") && !rechargingAttack)
         {
-            gm.PlaySFX(gm.gm_gameSfx.playerSfx[0]);
-            BombProjectile b = Instantiate(bomb, bulletSpawnPos.position, Quaternion.identity).GetComponent<BombProjectile>();
+            gunAnim.Play("Gun_Shoot", 0, 0);
+            List<BulletType> types = DetermineModsForBullet();
             Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mouse = new Vector3(mouse.x, mouse.y, 0);
             Vector2 dir = (mouse - bulletSpawnPos.position).normalized;
-            additionalForce = -dir * 10;
+
+            // Spreadshot
+            if (types.Contains(BulletType.spreadshot))
+            {
+                float spread = 0.25f;
+                Vector2 dirLeft = (dir + (Vector2)Vector3.Cross(dir, -Vector3.forward) * spread).normalized;
+                Vector2 dirRight = (dir - (Vector2)Vector3.Cross(dir, -Vector3.forward) * spread).normalized;
+
+                Vector2[] dirs = new Vector2[3] { dir, dirLeft, dirRight };
+                for (int i = 0; i < 3; i++)
+                {
+                    BombProjectile b = Instantiate(bomb, bulletSpawnPos.position, Quaternion.identity).GetComponent<BombProjectile>();
+                    b.Initialize(dirs[i], types, null);
+                }
+            }
+            else
+            {
+                BombProjectile b = Instantiate(bomb, bulletSpawnPos.position, Quaternion.identity).GetComponent<BombProjectile>();
+                b.Initialize(dir, types, null);
+            }
+
+
+            int soundToPlay = 0;
+            if (types.Count > 0)
+                soundToPlay = 1;
+
+            gm.PlaySFX(gm.gm_gameSfx.playerSfx[soundToPlay]);
+
+            //additionalForce = -dir * 10;
             gm.ScreenShake(2);
+            rechargingAttack = true;
             StartCoroutine(AttackCooldown());
-            b.Initialize(dir);
         }
+    }
+
+    List<BulletType> DetermineModsForBullet()
+    {
+        List<BulletType> bTypes = new List<BulletType>();
+
+        //bTypes.Add(BulletType.bigshot);
+        //bTypes.Add(BulletType.spreadshot);
+        //bTypes.Add(BulletType.crit);
+        //bTypes.Add(BulletType.homerun);
+        //bTypes.Add(BulletType.splitshot);
+        //bTypes.Add(BulletType.bigBoom);
+        //bTypes.Add(BulletType.lightning);
+        //bTypes.Add(BulletType.homing);
+
+        for (int i = 0; i < sm.unlockedWeaponMods.Count; i++)
+        {
+            float rand = Random.Range(0, 1f);
+            if (rand <= sm.unlockedWeaponMods[i].numericalValue / 18f)
+            {
+                BulletType type = BulletType.crit;
+                switch (sm.unlockedWeaponMods[i].info.id)
+                {
+                    case "mods_bigshot":
+                        type = BulletType.bigshot;
+                        break;
+                    case "mods_splitshot":
+                        type = BulletType.splitshot;
+                        break;
+                    case "mods_spreadshot":
+                        type = BulletType.spreadshot;
+                        break;
+                    case "mods_crit":
+                        type = BulletType.crit;
+                        break;
+                    case "mods_homing":
+                        type = BulletType.homing;
+                        break;
+                    case "mods_homerun":
+                        type = BulletType.homerun;
+                        break;
+                    case "mods_stun":
+                        type = BulletType.stun;
+                        break;
+                }
+                bTypes.Add(type);
+            }
+        }
+        print(sm.currentUltraStat.info.id);
+        if (sm.currentUltraStat.info.id.Contains("goodstuff_bigboom"))
+            bTypes.Add(BulletType.bigBoom);
+        if (sm.currentUltraStat.info.id.Contains("goodstuff_lightning"))
+            bTypes.Add(BulletType.lightning);
+
+        return bTypes;
     }
 
     IEnumerator AttackCooldown()
     {
         rechargingAttack = true;
-        yield return new WaitForSeconds(stats.baseRateOfFire);
+        yield return new WaitForSeconds(stats.baseRateOfFire / buffs.firerateMultiplier);
         rechargingAttack = false;
     }
 
     IEnumerator IFramesCooldown()
     {
         iFramesActive = true;
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(0.5f);
+        hurting = false;
+        yield return new WaitForSeconds(0.25f);
         iFramesActive = false;
     }
 
     public void SetVisible()
     {
         spr.color = Color.white;
-        
+
     }
 
     public void ReceiveDamage(int damage)
     {
-        if (stats.health > 0 && !iFramesActive)
+        if (!isDead && !iFramesActive && wm.inBattle)
             StartCoroutine(ReceiveDamageCoroutine(damage));
     }
 
@@ -178,7 +309,19 @@ public class PlayerController : MonoBehaviour
         //gm.PlaySFX(gm.gm_gameSfx.playerSfx[0]);
         spr.color = Color.red;
         float shakeAmount = 0.5f;
-        stats.health -= damage;
+        stats.health = Mathf.Clamp(stats.health - damage, 0, 100);
+
+        if (stats.health <= 0)
+        {
+            Die();
+            yield break;
+        }
+            
+
+        hurting = true;
+        iFramesActive = true;
+        StartCoroutine(IFramesCooldown());
+        CheckAndPlayClip("Player_Hurt");
 
         while (spr.color.g < 0.9f)
         {
@@ -188,7 +331,17 @@ public class PlayerController : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
         spr.transform.localPosition = Vector2.zero;
-        StartCoroutine(IFramesCooldown());
+    }
+
+    void Die()
+    {
+        rb.isKinematic = true;
+        gm.StopMusic();
+        gm.PlaySFX(gm.gm_gameSfx.generalSfx[10]);
+        CheckAndPlayClip("Player_Die");
+        isDead = true;
+        wm.inBattle = false;
+        gm.StartCoroutine(gm.EndLevel());
     }
 
     float AngleBetweenMouse(Transform reference)

@@ -1,25 +1,19 @@
 fileFormatVersion: 2
-guid: 3504c144debed6344b0d182799959e30
+guid: 026c3107631054a42b4b78692eeeb9bd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4222367717619935464
-    second: EnemyDice1_0
+      213: -8669086294865625778
+    second: DiceBulletBig_0
   - first:
-      213: -5211638333985772412
-    second: EnemyDice1_1
+      213: 3657247921172245215
+    second: DiceBulletBig_1
   - first:
-      213: -4635710824531361735
-    second: EnemyDice1_2
+      213: -9105891873604957353
+    second: DiceBulletBig_2
   - first:
-      213: -2206177634199662949
-    second: EnemyDice1_3
-  - first:
-      213: 2704627812378837760
-    second: EnemyDice1_4
-  - first:
-      213: 6875407982996860702
-    second: EnemyDice1_5
+      213: -6628798444641776680
+    second: DiceBulletBig_3
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -121,76 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: EnemyDice1_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 32
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8e820df611dd89a30800000000000000
-      internalID: 4222367717619935464
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: EnemyDice1_1
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 32
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 48c28f43c8a8ca7b0800000000000000
-      internalID: -5211638333985772412
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: EnemyDice1_2
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 32
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 930006ee095aaafb0800000000000000
-      internalID: -4635710824531361735
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: EnemyDice1_3
+      name: DiceBulletBig_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 32
-        height: 32
+        width: 23
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -198,20 +129,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b9e0e1a61251261e0800000000000000
-      internalID: -2206177634199662949
+      spriteID: e4db35312f731b780800000000000000
+      internalID: -8669086294865625778
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: EnemyDice1_4
+      name: DiceBulletBig_1
       rect:
         serializedVersion: 2
-        x: 32
+        x: 23
         y: 0
-        width: 32
-        height: 32
+        width: 23
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -219,20 +150,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0038b766aa4c88520800000000000000
-      internalID: 2704627812378837760
+      spriteID: fdae10d7b9721c230800000000000000
+      internalID: 3657247921172245215
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: EnemyDice1_5
+      name: DiceBulletBig_2
       rect:
         serializedVersion: 2
-        x: 64
+        x: 46
         y: 0
-        width: 32
-        height: 32
+        width: 23
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -240,8 +171,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e1fa960122b5a6f50800000000000000
-      internalID: 6875407982996860702
+      spriteID: 75b09a6069f51a180800000000000000
+      internalID: -9105891873604957353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DiceBulletBig_3
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 0
+        width: 23
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8db077b7fe6c104a0800000000000000
+      internalID: -6628798444641776680
       vertices: []
       indices: 
       edges: []

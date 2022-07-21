@@ -165,8 +165,8 @@ MonoBehaviour:
   stats:
     health: 30
     maxHealth: 0
-    maxSpeed: 10
-    damage: 4
+    maxSpeed: 13
+    damage: 5
     playerKnockbackAmount: 15
     projectile: {fileID: 0}
     invincible: 1

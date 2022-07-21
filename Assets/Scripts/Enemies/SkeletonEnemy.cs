@@ -9,7 +9,7 @@ public class SkeletonEnemy : Enemy
     {
         GetReferences();
         if (sm.EnemyHasStat("badstuff_speeddemon"))
-            stats.maxSpeed *= 2;
+            stats.maxSpeed *= 1.75f;
     }
 
     // Update is called once per frame
@@ -24,9 +24,7 @@ public class SkeletonEnemy : Enemy
     {
         if (isDead)
         {
-            rb.velocity = knockbackVelocity;
-            if (rb.velocity == Vector2.zero)
-                DestroyEnemy();
+            DestroyEnemy();
             return;
         }
 

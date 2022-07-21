@@ -45,10 +45,7 @@ public class ReaperEnemy : Enemy
     {
         if (collision.tag == "Player")
         {
-            if (collision.tag == "Player")
-            {
-                StartCoroutine(RerollPlayerStat());
-            }
+            DamagePlayer();
         }
     }
 
@@ -60,6 +57,7 @@ public class ReaperEnemy : Enemy
 
     public override void DamagePlayer()
     {
-        
+        ply.ReceiveDamage(stats.damage);
+        ply.knockbackForceFromEnemies = (ply.transform.position - transform.position).normalized * stats.playerKnockbackAmount;
     }
 }

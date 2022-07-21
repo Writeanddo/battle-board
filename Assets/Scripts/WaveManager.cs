@@ -5,6 +5,7 @@ using System.Linq;
 
 public class WaveManager : MonoBehaviour
 {
+    public int furthestRoundReached = 0;
     public int currentRound = 1;
     public int currentWorld = 1;
     public int currentLoop = 0;
@@ -15,6 +16,8 @@ public class WaveManager : MonoBehaviour
     public List<GameObject> additionalEnemies; // evil eye, reaper, etc.
     public List<Enemy> spawnedEnemies;
     public int enemiesLeft; // How many enemies we haven't spawned yet
+
+    public Transform[] arenas;
 
     public GameObject tempSkeleton;
 
@@ -40,9 +43,11 @@ public class WaveManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        furthestRoundReached = currentRound + (currentWorld - 1) * 3 + currentLoop * 9;
         gm = FindObjectOfType<GameManager>();
         sm = FindObjectOfType<StatManager>();
         ply = FindObjectOfType<PlayerController>();
+        spawnedEnemies = FindObjectsOfType<Enemy>().ToList();
     }
 
     // Update is called once per frame
@@ -62,25 +67,31 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    public void ResetGame()
+    {
+        inBattle = false;
+        furthestRoundReached = 0;
+        currentRound = 1;
+        currentWorld = 1;
+        currentLoop = 0;
+    }
+
     IEnumerator SpawnEnemies()
     {
-        int multiplier = 1;
+        int multiplierMax = 1;
         if (sm.EnemyHasStat("badstuff_double"))
-            multiplier = 2;
+            multiplierMax = 2;
 
         // Determine how many total enemies we'll spawn
-        enemiesLeft = additionalEnemies.Count * multiplier;
+        enemiesLeft = additionalEnemies.Count;
         for (int i = 0; i < enemiesToSpawn.Count; i++)
-            enemiesLeft += enemiesToSpawn[i].numEnemies * multiplier;
+            enemiesLeft += enemiesToSpawn[i].numEnemies * multiplierMax;
 
         // Spawn extra enemies at start of match
         for (int i = 0; i < additionalEnemies.Count; i++)
         {
-            for (int j = 0; j < multiplier; j++)
-            {
-                Instantiate(additionalEnemies[i], new Vector2(Random.Range(-20, 21), Random.Range(16, 21)), Quaternion.identity);
-                yield return new WaitForSeconds(0.2f);
-            }
+            Instantiate(additionalEnemies[i], new Vector2(Random.Range(-20, 21), Random.Range(16, 21)), Quaternion.identity);
+            yield return new WaitForSeconds(0.2f);
             enemiesLeft--;
         }
 
@@ -92,9 +103,9 @@ public class WaveManager : MonoBehaviour
             if (ply.transform.position.x >= 0)
                 roomSide = -1;
             Vector2 clusterPoint = new Vector2(roomSide * Mathf.RoundToInt(Random.Range(18, 21f) / 2) * 2, Mathf.RoundToInt(Random.Range(-18, 21) / 2) * 2);
-            for (int j = 0; j < groupSize * multiplier; j++)
+            for (int j = 0; j < groupSize * multiplierMax; j++)
             {
-                Vector2 offset = new Vector2(Random.Range(-4, 5), Random.Range(-4, 5));
+                Vector2 offset = new Vector2(Mathf.RoundToInt(Random.Range(-4, 5f) / 2) * 2, Mathf.RoundToInt(Random.Range(-4, 5f) / 2) * 2);
                 GameObject g = Instantiate(enemiesToSpawn[i].enemy, clusterPoint + offset, Quaternion.identity);
                 spawnedEnemies.Add(g.GetComponent<Enemy>());
                 enemiesLeft--;
@@ -147,6 +158,17 @@ public class WaveManager : MonoBehaviour
         return g;
     }
 
+    public void UpdateArena()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (currentWorld - 1 == i)
+                arenas[i].position = new Vector2(-25, 25);
+            else
+                arenas[i].position = Vector2.right * 300;
+        }
+    }
+
     public void StartNextWave()
     {
         // Get list of enemies from bogus menu
@@ -158,6 +180,7 @@ public class WaveManager : MonoBehaviour
 
     void IncreaseRound()
     {
+        furthestRoundReached++;
         currentRound++;
         if (currentRound >= 4)
         {

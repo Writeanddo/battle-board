@@ -31,7 +31,7 @@ public class TipPopupWindow : MonoBehaviour
     {
         if (active)
         {
-            Vector2 pos = focus.anchoredPosition + Vector2.right * 162;
+            Vector2 pos = focus.anchoredPosition + Vector2.right * 168;
             pos = new Vector2(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
             rect.anchoredPosition = pos;
         }
@@ -57,9 +57,14 @@ public class TipPopupWindow : MonoBehaviour
         else
         {
             value.text = stat.numericalValue.ToString();
-            int val = Mathf.RoundToInt(stat.numericalValue / 18f * 100);
-            if(!stat.info.hidePercentage)
-                percentage.text = val.ToString() + "% chance";
+            int val;
+            if(stat.info.id.Contains("stats"))
+                val = Mathf.RoundToInt(stat.numericalValue / 12f * 100);
+            else
+                val = Mathf.RoundToInt(stat.numericalValue / 18f * 100);
+
+            if (!stat.info.hidePercentage)
+                percentage.text = val.ToString() + "% "+stat.info.percentSuffix;
             else
                 percentage.text = "";
         }

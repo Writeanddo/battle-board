@@ -71,12 +71,12 @@ public abstract class Enemy : MonoBehaviour
         knockbackVelocity = Vector2.MoveTowards(knockbackVelocity, Vector2.zero, 0.5f);
     }
 
-    public void ReceiveDamage(int damage, Vector3 hitPosition)
+    public void ReceiveDamage(int damage, Vector3 hitPosition, float knockbackMultiplier)
     {
-        StartCoroutine(ReceiveDamageCoroutine(damage, hitPosition));
+        StartCoroutine(ReceiveDamageCoroutine(damage, hitPosition, knockbackMultiplier));
     }
 
-    IEnumerator ReceiveDamageCoroutine(int damage, Vector3 hitPosition)
+    IEnumerator ReceiveDamageCoroutine(int damage, Vector3 hitPosition, float knockbackMultiplier)
     {
         if (gm == null || stats.invincible)
             yield break;
@@ -86,13 +86,12 @@ public abstract class Enemy : MonoBehaviour
         stats.health -= damage;
 
         Vector2 dir = (transform.position - hitPosition).normalized;
-        print(damage);
-        Instantiate(gm.gm_gameRefs.hitNumber, transform.position + Vector3.up, Quaternion.identity).GetComponent<HitNumberScript>().Initialize(damage);
+        Instantiate(gm.gm_gameRefs.hitNumber, transform.position + Vector3.up, Quaternion.identity).GetComponent<HitNumberScript>().Initialize(Mathf.Clamp(damage, 1, 6));
 
         if (stats.health <= 0)
-            StartCoroutine(Die(dir));
+            StartCoroutine(Die(dir * knockbackMultiplier));
         else
-            knockbackVelocity = dir * 10;
+            knockbackVelocity = dir * 10 * knockbackMultiplier;
 
         while (spr.color.g < 0.9f)
         {
@@ -117,10 +116,12 @@ public abstract class Enemy : MonoBehaviour
 
     protected void DestroyEnemy()
     {
-        if(!stats.bigEnemy)
-            Instantiate(gm.gm_gameRefs.smokeClouds[0], transform.position, Quaternion.identity);
-        else
+        if (stats.bigEnemy || sm.currentUltraStat.info.id.Contains("goodstuff_bigboom"))
             Instantiate(gm.gm_gameRefs.bigExplosion, transform.position, Quaternion.identity);
+        else
+            Instantiate(gm.gm_gameRefs.smokeClouds[0], transform.position, Quaternion.identity);
+
+        gm.gm_gameVars.kills++;
         Destroy(this.gameObject);
     }
 
